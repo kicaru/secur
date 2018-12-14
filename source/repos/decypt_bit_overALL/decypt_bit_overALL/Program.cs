@@ -96,15 +96,16 @@ namespace bite_overall
                                   {  "1011","1000" ,"1100","0111","0001","1110","0010","1101","0110","1111","0000","1001","1010","0100","0101","0011"} };
             string sum = null;
             string temp = null;
+            string text;
+            int strA;
             string part = p.Substring(0, 8);
+            string a, b;
             int i = 0;
             while (i < 2)
             {
-                
-                string a = part.Substring(0, 2);
-                string b = part.Substring(4);
-                string text;
-                int strA = Convert.ToInt32(a, 2);
+               a = part.Substring(0, 2);
+                b = part.Substring(4);
+                strA = Convert.ToInt32(a, 2);
                 for(int j = 0; j < 16; j++)
                 {
                     if (vir_table[strA,j].Equals(b))
@@ -112,6 +113,8 @@ namespace bite_overall
 
                         text = Convert.ToString(j, 2);
                         text = text.PadLeft(4, '0');
+                        Console.WriteLine(part);
+                        Console.WriteLine(b);
                         a = part.Substring(0, 4);
                         temp = a + text;
                         break;
@@ -132,7 +135,8 @@ namespace bite_overall
            int temp2 = Convert.ToInt16(part2, 2);
            char character = (char)(temp1);
            char character1 = (char)(temp2);
-           string text = character.ToString() + character1.ToString();
+           string text = character.ToString();
+            text += character1.ToString();
             return text;
         }
 
@@ -142,6 +146,7 @@ namespace bite_overall
         {
             string p, k;
             string sumbit, sum, sumkey;
+            string sumall = null;
 
 
             Console.WriteLine("input string");
@@ -165,8 +170,10 @@ namespace bite_overall
                 Console.WriteLine("shift right 3 bit: {0}", sum);
                 sum = constr(sum);
                 Console.WriteLine("Conver to string : {0}", sum);
-
+                sumall += sum;
+                
             }
+            Console.WriteLine("sum {0}", sumall);
         }
 
     }

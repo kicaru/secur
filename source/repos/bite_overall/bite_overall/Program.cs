@@ -21,18 +21,19 @@ namespace bite_overall
             int key1 = Convert.ToInt32((key.Substring(0,8)), 2);
             int key2 = Convert.ToInt32((key.Substring(8)), 2);
             int pen1 = Convert.ToInt32((p.Substring(0, 8)), 2);
-
             pen1 ^= key1;
             pen2 ^= key2;
             string part1 = Convert.ToString(pen1, 2);
             string part2 = Convert.ToString(pen2, 2);
             part1 = part1.PadLeft(8, '0');
             part2 = part2.PadLeft(8, '0');
+            Console.WriteLine(part1+part2);
             int temp1 = Convert.ToInt16(part1,2);
             int temp2 = Convert.ToInt16(part2,2);
             char character = (char)(temp1);
             char character1 = (char)(temp2);
-            string text = character.ToString() + character1.ToString();
+            string text = character.ToString();
+            text += character1.ToString();
             return text;
         }
 
@@ -110,8 +111,8 @@ namespace bite_overall
         {
             string p,k;
             string sumbit,sum,sumkey;
-            
 
+            String sumall= null;
             Console.WriteLine("input string");
             p=Console.ReadLine();
             Console.WriteLine("input key");
@@ -131,8 +132,10 @@ namespace bite_overall
                 Console.WriteLine("Convert key to binary : {0}",sumkey);
                 sum=xorconcpt(sum, sumkey);
                 Console.WriteLine("XOR : {0}",sum);
-
+                sumall += sum;
+                
             }
+            Console.WriteLine("sum {0}", sumall);
         }
 
     }
