@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace bite_overall
@@ -110,14 +111,18 @@ namespace bite_overall
         {
             string p,k;
             string sumbit,sum,sumkey;
+            string path = @"D:\test.txt";
             int count;
             String sumall= null;
             Console.WriteLine("input string");
             p=Console.ReadLine();
             Console.WriteLine("input key");
             k = Console.ReadLine();
-            count = k.Length-(p.Length % k.Length);
-            p = p.PadRight((p.Length+count),'A');
+            if ((p.Length % k.Length) > 0)
+            {
+                count = k.Length - (p.Length % k.Length);
+                p = p.PadRight((p.Length + count), 'A');
+            }
             for (int i = 0; i < p.Length; i += k.Length)
             {
                 sum = sbstr(p, k.Length, i);
@@ -137,6 +142,15 @@ namespace bite_overall
                 
             }
             Console.WriteLine("sum {0}", sumall);
+            
+                
+                using (StreamWriter sw = File.CreateText(path))
+                {
+                    sw.WriteLine(sumall);
+                    
+                }
+               
+            
         }
 
     }

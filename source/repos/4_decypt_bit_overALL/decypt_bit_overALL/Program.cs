@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace bite_overall
@@ -137,18 +138,23 @@ namespace bite_overall
             text += character1.ToString();
             return text;
         }
-
-
-
+        
         static void Main(string[] args)
         {
+            string path = @"D:\test.txt";
             string p, k;
             string sumbit, sum, sumkey;
             string sumall = null;
 
 
-            Console.WriteLine("input string");
-            p = Console.ReadLine();
+
+            using (StreamReader sr = File.OpenText(path))
+            {
+
+                p = sr.ReadLine();
+                Console.WriteLine(p);
+            }
+
             Console.WriteLine("input key");
             k = Console.ReadLine();
             for (int i = 0; i < p.Length; i += k.Length)
