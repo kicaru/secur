@@ -1,6 +1,6 @@
 #pragma comment(lib, "Ws2_32.lib")//system
 #pragma comment(lib, "crypt32.lib") //system
-#pragma comment(lib, "D:\\1\\openssl-1.1.0f-vs2010\\lib\\libcryptoMT.lib")
+#pragma comment(lib, "D:\\1\\openssl-1.1.0f-vs2010\\lib64\\libcryptoMT.lib")
 #include <stdio.h>
 #include <iomanip>
 #include <string.h>
@@ -110,41 +110,56 @@ int main()
 
 	char cstr[3244];
 	char pub[801];
+	string EncypDeskey;
 	strcpy_s(cstr, privateKey.c_str());
 	strcpy_s(pub, pubKey.c_str());
 	unsigned char in[BUFSIZE], out[BUFSIZE], back[BUFSIZE];
 	unsigned char *e = out;
 	unsigned char *b = back;
 
+	DES_cblock keyDes = { 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54, 0x32, 0x10 };
 	DES_cblock key = {*cstr};
-	DES_key_schedule keysched;
 
 	memset(in, 0, sizeof(in));
 	memset(out, 0, sizeof(out));
 	memset(back, 0, sizeof(back));
 
-	DES_set_key((const_DES_cblock *)key, &keysched);
-	/* 8 bytes of plaintext */
-	strcpy_s((char*)in, input_txt.size()+1, input_txt.c_str());
-
+	DES_key_schedule keyschedDes;
+	DES_set_key((const_DES_cblock *)keyDes, &keyschedDes);
+	strcpy_s((char*)in, input_txt.size() + 1, input_txt.c_str());
 	printf("Plaintext: [%s]\n", in);
-
-	DES_ecb_encrypt((const_DES_cblock *)in, (const_DES_cblock *)out, &keysched, DES_ENCRYPT);
-	string r;
-	char  buffer[200];
-	printf("Ciphertext:");
+	DES_ecb_encrypt((const_DES_cblock *)in, (const_DES_cblock *)out, &keyschedDes, DES_ENCRYPT);
 	while (*e) {
-		sprintf_s(buffer,200 ,"%02x", *e);
-		r += buffer;
-		printf(" [%02x]", *e++); 
+		EncypDeskey += *e;
+		printf(" [%02x]", *e++);
 	}
 	printf("\n");
+
+
+	
+	DES_key_schedule keysched;
+	DES_set_key((const_DES_cblock *)key, &keysched);
+	
+	strcpy_s((char*)in, EncypDeskey.size()+1, EncypDeskey.c_str());
+	printf("Encrypted DES key : [%s]\n", in);
+	DES_ecb_encrypt((const_DES_cblock *)in, (const_DES_cblock *)out, &keysched, DES_ENCRYPT);
+	string r;
+	unsigned char *pd = out;
+	char  buffer[200];
+	while (*pd) {
+		sprintf_s(buffer,200 ,"%02x", *pd);
+		r += buffer;
+	  *pd++;
+	}
+	cout << "Encrypted DES key and Private Key : " << r << endl;
+	printf("\n\n");
 	fputs(r.c_str(), cipher_txt);
 	fclose(cipher_txt);
 
-
+	
 
 	//------------Decrypted----------
+	cout << "------------Decrypted----------" << endl;
 	err_in_cipher = fopen_s(&in_cipher_txt, "D:\\DES\\Ciphertext.txt", "r");
 	if (err_in_cipher == 0)
 	{
@@ -153,24 +168,33 @@ int main()
 		}
 		fclose(in_cipher_txt);
 	}
+	cout << "CipherText [ " << in_cipher_text <<" ]"<<endl;
 	in_cipher_text = convertHextochar(in_cipher_text);
 	strcpy_s((char*)out, in_cipher_text.size() + 1, in_cipher_text.c_str());
-
-
-	DES_cblock key2 = { *pub };
+	string decrypt;
+	DES_cblock keypub = { *pub };
+	DES_key_schedule keyschedpub;
+	DES_set_key((const_DES_cblock *)keypub, &keyschedpub);
+	DES_ecb_encrypt((const_DES_cblock *)out, (const_DES_cblock *)back, &keyschedpub, DES_DECRYPT);
+	while (*b) {
+		decrypt += *b;
+		 *b++;
+	}
+	strcpy_s((char*)out, decrypt.size() + 1, decrypt.c_str());
 	DES_key_schedule keysched2;
-	DES_set_key((const_DES_cblock *)key2, &keysched2);
-	DES_ecb_encrypt((const_DES_cblock *)out, (const_DES_cblock *)back, &keysched, DES_DECRYPT);
-
-	printf("Decrypted Text: [%s]\n", back);
+	DES_set_key((const_DES_cblock *)keyDes, &keysched2);
+	printf("Decrypted DES key and Public Key : [%s]\n", out);
+	DES_ecb_encrypt((const_DES_cblock *)out, (const_DES_cblock *)back, &keysched2, DES_DECRYPT);
+	unsigned char *bup = back;
 	fopen_s(&decryp_txt, "D:\\DES\\Decryptext.txt", "w");
 	string r0;
 	char  buffer0[200];
-	while (*b) {
-		sprintf_s(buffer0, 200, "%c", *b);
+	while (*bup) {
+		sprintf_s(buffer0, 200, "%c", *bup);
 		r0 += buffer0;
-		 *b++;
+		*bup++;
 	}
+	cout << "Decrypted DES key : " << r0 << endl;
 	fputs(r0.c_str(), decryp_txt);
 	fclose(cipher_txt);
 	return(0);

@@ -10,6 +10,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <cstring>
+
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/rsa.h>
+#include <openssl/evp.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <stdio.h>
+
+
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
@@ -18,6 +28,7 @@
 #include <openssl/err.h>
 #include <stdio.h>
 #include <string>
+
 using namespace std;
 
 int padding = RSA_PKCS1_PADDING;
@@ -75,12 +86,14 @@ int public_decrypt(unsigned char * enc_data, int data_len, unsigned char * key, 
 	return result;
 }
 
-void printLastError(char *msg[24])
+void printLastError(string msg)
 {
+	char mss[25];
+	strcpy_s(mss, msg.c_str());
 	char * err = (char *)malloc(130);;
 	ERR_load_crypto_strings();
 	ERR_error_string(ERR_get_error(), err);
-	printf("%s ERROR: %s\n", msg, err);
+	printf("%s ERROR: %s\n", mss, err);
 	free(err);
 }
 
@@ -95,7 +108,7 @@ int main() {
 	int c, d;
 	string privKey;
 	string pubKey;
-	FILE *fp, *fpub, *encp_txt, *cipher_txt, *in_cipher_txt, *decryp_txt;
+	FILE *fp, *fpub;
 	err = fopen_s(&fp, "D:\\1\\openssl-1.1.0f-vs2010\\bin64\\blob.private.key", "r");
 	err1 = fopen_s(&fpub, "D:\\1\\openssl-1.1.0f-vs2010\\bin64\\blob.pub.key", "r");
 	if (err == 0)
@@ -121,7 +134,7 @@ int main() {
 
 	unsigned char  encrypted[4098] = {};
 	unsigned char decrypted[4098] = {};
-	
+
 
 	int encrypted_length = public_encrypt((unsigned char *)plainText,
 		strlen(plainText),
@@ -147,7 +160,3 @@ int main() {
 	printf("Decrypted Length =%d\n", decrypted_length);
 
 }
-
-
-
-
