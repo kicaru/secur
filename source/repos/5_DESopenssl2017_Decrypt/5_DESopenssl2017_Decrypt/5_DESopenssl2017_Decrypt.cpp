@@ -17,6 +17,8 @@
 #define BUFSIZE 1024*64
 using namespace std;
 
+
+
 string GetBinaryStringFromHexString(string sHex)
 {
 	string sReturn = "";
@@ -48,15 +50,15 @@ string GetBinaryStringFromHexString(string sHex)
 
 
 string convertHextochar(string c) {
-	string r,a,result;
+	string r, a, result;
 	a = c;
-	
+
 	char buffer[200];
 	string temp;
 	for (int i = 0; i < c.length(); i++) {
-		r =GetBinaryStringFromHexString(a);
+		r = GetBinaryStringFromHexString(a);
 	}
-	for (int i = 0; i < r.length(); i+=8) {
+	for (int i = 0; i < r.length(); i += 8) {
 		temp = r.substr(i, 8);
 		std::bitset<8> foo(temp);
 		sprintf_s(buffer, 200, "%c", foo.to_ulong());
@@ -69,21 +71,16 @@ string convertHextochar(string c) {
 
 int main()
 {
-	errno_t err, err1,err_encyp,err_cipher, err_in_cipher,err_key;
-	int c, d,encp,cipher,in_cipher,in_key;
-	string privateKey;
-	string keystr;
+	errno_t err1, err_in_cipher, err_key;
+	int d, cipher, in_cipher, in_key;
 	string pubKey;
-	string input_txt;
-	string cipher_text;
+	string keystr;
 	string in_cipher_text;
-	FILE *fp, *fpub,*encp_txt,*cipher_txt, *in_cipher_txt,*decryp_txt,*key_txt;
-	err = fopen_s(&fp, "D:\\1\\openssl-1.1.0f-vs2010\\bin64\\blob.private.key", "r");
+	FILE *fpub, *cipher_txt, *in_cipher_txt, *decryp_txt,*key_txt;
 	err1 = fopen_s(&fpub, "D:\\1\\openssl-1.1.0f-vs2010\\bin64\\blob.pub.key", "r");
-	err_encyp = fopen_s(&encp_txt, "D:\\DES\\Encype.txt", "r");
-	err_cipher = fopen_s(&cipher_txt, "D:\\DES\\Ciphertext.txt", "w");
+	err_in_cipher = fopen_s(&in_cipher_txt, "D:\\DES\\Ciphertext.txt", "r");
 	err_key = fopen_s(&key_txt, "D:\\DES\\Encype.txt", "r");
-	
+
 
 	if (err_key == 0)
 	{
@@ -92,92 +89,42 @@ int main()
 		}
 		fclose(key_txt);
 	}
-	if (err == 0)
+	if (err_in_cipher == 0)
 	{
-		while ((c = getc(fp)) != EOF) {
-			privateKey += c;
+		while ((in_cipher = getc(in_cipher_txt)) != EOF) {
+			in_cipher_text += in_cipher;
 		}
-			fclose(fp);
+		fclose(in_cipher_txt);
 	}
+
 	if (err1 == 0)
 	{
 		while ((d = getc(fpub)) != EOF) {
 			pubKey += d;
 		}
-			fclose(fpub);
-	}
-	if (err_encyp == 0)
-	{
-		while ((encp = getc(encp_txt)) != EOF) {
-			input_txt += encp;
-		}
-		fclose(encp_txt);
+		fclose(fpub);
 	}
 
 
-	char cstr[3244];
 	char pub[801];
 	char keystring[1000];
 	string EncypDeskey;
-	strcpy_s(cstr, privateKey.c_str());
+	strcpy_s(keystring, keystr.c_str());
 	strcpy_s(pub, pubKey.c_str());
 	unsigned char in[BUFSIZE], out[BUFSIZE], back[BUFSIZE];
-	unsigned char *e = out;
 	unsigned char *b = back;
-	strcpy_s(keystring, keystr.c_str());
 	DES_cblock keyDes = { *keystring };
-	DES_cblock key = {*cstr};
 
 	memset(in, 0, sizeof(in));
 	memset(out, 0, sizeof(out));
 	memset(back, 0, sizeof(back));
 
-	DES_key_schedule keyschedDes;
-	DES_set_key((const_DES_cblock *)keyDes, &keyschedDes);
-	strcpy_s((char*)in, input_txt.size() + 1, input_txt.c_str());
-	printf("Plaintext: [%s]\n", in);
-	DES_ecb_encrypt((const_DES_cblock *)in, (const_DES_cblock *)out, &keyschedDes, DES_ENCRYPT);
-	while (*e) {
-		EncypDeskey += *e;
-		printf(" [%02x]", *e++);
-	}
-	printf("\n");
-
-
-	
-	DES_key_schedule keysched;
-	DES_set_key((const_DES_cblock *)key, &keysched);
-	
-	strcpy_s((char*)in, EncypDeskey.size()+1, EncypDeskey.c_str());
-	printf("Encrypted DES key : [%s]\n", in);
-	DES_ecb_encrypt((const_DES_cblock *)in, (const_DES_cblock *)out, &keysched, DES_ENCRYPT);
-	string r;
-	unsigned char *pd = out;
-	char  buffer[200];
-	while (*pd) {
-		sprintf_s(buffer,200 ,"%02x", *pd);
-		r += buffer;
-	  *pd++;
-	}
-	cout << "Encrypted DES key and Private Key : " << r << endl;
-	printf("\n\n");
-	fputs(r.c_str(), cipher_txt);
-	fclose(cipher_txt);
-
 	
 
 	//------------Decrypted----------
-	/*
 	cout << "------------Decrypted----------" << endl;
-	err_in_cipher = fopen_s(&in_cipher_txt, "D:\\DES\\Ciphertext.txt", "r");
-	if (err_in_cipher == 0)
-	{
-		while ((in_cipher  = getc(in_cipher_txt)) != EOF) {
-			in_cipher_text += in_cipher;
-		}
-		fclose(in_cipher_txt);
-	}
-	cout << "CipherText [ " << in_cipher_text <<" ]"<<endl;
+	
+	cout << "CipherText [ " << in_cipher_text << " ]" << endl;
 	in_cipher_text = convertHextochar(in_cipher_text);
 	strcpy_s((char*)out, in_cipher_text.size() + 1, in_cipher_text.c_str());
 	string decrypt;
@@ -187,7 +134,7 @@ int main()
 	DES_ecb_encrypt((const_DES_cblock *)out, (const_DES_cblock *)back, &keyschedpub, DES_DECRYPT);
 	while (*b) {
 		decrypt += *b;
-		 *b++;
+		*b++;
 	}
 	strcpy_s((char*)out, decrypt.size() + 1, decrypt.c_str());
 	DES_key_schedule keysched2;
@@ -205,8 +152,8 @@ int main()
 	}
 	cout << "Decrypted DES key : " << r0 << endl;
 	fputs(r0.c_str(), decryp_txt);
-	fclose(cipher_txt);
+	fclose(decryp_txt);
 	return(0);
 
-	*/
+
 }
