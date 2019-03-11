@@ -23,8 +23,11 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="6_RSAopenssl_Decrypt.cpp">
+    <ClCompile Include="8_Digital_Signing_enc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\8_Digital_Signing_dec\8_Digital_Signing_dec.sln" />
   </ItemGroup>
 </Project>

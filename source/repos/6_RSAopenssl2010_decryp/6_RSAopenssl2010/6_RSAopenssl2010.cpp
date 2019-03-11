@@ -19,7 +19,6 @@
 #include <openssl/err.h>
 #include <stdio.h>
 
-
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
@@ -59,18 +58,32 @@ RSA * createRSA(unsigned char * key, int publickey)
 	return rsa;
 }
 
+int public_encrypt(unsigned char * data, int data_len, unsigned char * key, unsigned char *encrypted)
+{
+	RSA * rsa = createRSA(key, 1);
+	int result = RSA_public_encrypt(data_len, data, encrypted, rsa, padding);
+	return result;
+}
+int private_decrypt(unsigned char * enc_data, int data_len, unsigned char * key, unsigned char *decrypted)
+{
+	RSA * rsa = createRSA(key, 0);
+	int  result = RSA_private_decrypt(data_len, enc_data, decrypted, rsa, padding);
+	return result;
+}
+
+
+int private_encrypt(unsigned char * data, int data_len, unsigned char * key, unsigned char *encrypted)
+{
+	RSA * rsa = createRSA(key, 0);
+	int result = RSA_private_encrypt(data_len, data, encrypted, rsa, padding);
+	return result;
+}
 int public_decrypt(unsigned char * enc_data, int data_len, unsigned char * key, unsigned char *decrypted)
 {
 	RSA * rsa = createRSA(key, 1);
 	int  result = RSA_public_decrypt(data_len, enc_data, decrypted, rsa, padding);
-	cout << enc_data << endl;
-	cout << data_len << endl;
-	cout << decrypted << endl;
-	cout << rsa << endl;
-	cout << "padding  "<<padding << endl;
 	return result;
 }
-
 
 void printLastError(string msg)
 {
@@ -82,6 +95,7 @@ void printLastError(string msg)
 	printf("%s ERROR: %s\n", mss, err);
 	free(err);
 }
+
 
 
 string GetBinaryStringFromHexString(string sHex)
@@ -136,13 +150,23 @@ string convertHextochar(string c) {
 
 int main() {
 
-	errno_t err1, err_in_cipher;
-	int d, in_cipher;
+	errno_t err, err1, err_encyp, err_cipher, err_in_cipher;
+	int c, d, encp, cipher, in_cipher;
+	string input_txt;
+	string cipher_text;
 	string in_cipher_text;
+	string privKey;
 	string pubKey;
-	FILE *fpub, *in_cipher_txt, *decryp_txt;
+	FILE *fp, *fpub, *encp_txt, *cipher_txt, *in_cipher_txt, *decryp_txt;
+	err = fopen_s(&fp, "D:\\1\\openssl-1.1.0f-vs2010\\bin64\\blob.private.key", "r");
 	err1 = fopen_s(&fpub, "D:\\1\\openssl-1.1.0f-vs2010\\bin64\\blob.pub.key", "r");
-	err_in_cipher = fopen_s(&in_cipher_txt, "D:\\RSA\\Ciphertext.txt", "r");
+	if (err == 0)
+	{
+		while ((c = getc(fp)) != EOF) {
+			privKey += c;
+		}
+		fclose(fp);
+	}
 	if (err1 == 0)
 	{
 		while ((d = getc(fpub)) != EOF) {
@@ -150,6 +174,21 @@ int main() {
 		}
 		fclose(fpub);
 	}
+	char privateKey[5000];
+	char publicKey[900];
+	strcpy_s(privateKey, privKey.c_str());
+	strcpy_s(publicKey, pubKey.c_str());
+	unsigned char  encrypted[1024*10] = {};
+	unsigned char decrypted[1024*10] = {};
+
+	//------------------publikey encrypt before privatekey decrypt----------------------------
+	
+
+	//------------------publikey encrypt before privatekey decrypt----------------------------
+	
+	
+	
+	err_in_cipher = fopen_s(&in_cipher_txt, "D:\\RSA\\Ciphertext.txt", "r");
 	if (err_in_cipher == 0)
 	{
 		while ((in_cipher = getc(in_cipher_txt)) != EOF) {
@@ -157,26 +196,19 @@ int main() {
 		}
 		fclose(in_cipher_txt);
 	}
-
-	char publicKey[801];
-	strcpy_s(publicKey, pubKey.c_str());
-	unsigned char  encrypted[4098] = {};
-	unsigned char decrypted[4098] = {};
 	in_cipher_text = convertHextochar(in_cipher_text);
 	strcpy_s((char *)encrypted, in_cipher_text.size() + 1, in_cipher_text.c_str());
 	int encrypted_length = 512;
+
 	int decrypted_length = public_decrypt(encrypted, encrypted_length, (unsigned char *)publicKey, decrypted);
 	if (decrypted_length == -1)
 	{
 		printLastError("Private Decrypt failed ");
 		exit(0);
 	}
-	printf("Decrypted Text =%s\n", decrypted);
-	printf("Decrypted Length =%d\n", decrypted_length);
+	printf("Decrypted Text = %s\n", decrypted);
+	printf("Decrypted Length = %d\n", decrypted_length);
 	fopen_s(&decryp_txt, "D:\\RSA\\Decrypt.txt", "w");
 	fwrite(decrypted, sizeof(char), sizeof(decrypted), decryp_txt);
 	fclose(decryp_txt);
 }
-
-
-
